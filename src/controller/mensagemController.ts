@@ -5,15 +5,11 @@ import { FeedMensagemInterface } from '@src/models/feedMensagem.interface';
 
 export async function buscarMensagensAnteriores(req:any, res:any) {
   try {
-    const { sala } = req.params;
     const client = await conectarAoBanco();
     const db = client.db('chat');
     const collection = db.collection('mensagens');
 
-    const mensagensAnteriores = await collection
-      .find({ sala })
-      .sort({ timestamp: 1 })
-      .toArray();
+    const mensagensAnteriores = await collection.find().toArray();
     return res.status(200).json(mensagensAnteriores);
   } catch (err) {
     console.error('Erro ao buscar mensagens anteriores:', err);
@@ -205,6 +201,38 @@ export async function buscarPostsGeral(req:any, res:any) {
   } catch (err) {
     console.error('Erro ao buscar mensagens:', err);
     res.status(500).json({ erro: 'Erro interno do servidor' });
+  }
+}
+
+export async function enviarMensagemChatGeral(req:any, res:any){
+
+  try {
+
+    const {usuario, conteudo} = req.body;
+    const client = await conectarAoBanco();
+    const db = client.db('chat');
+    const collection = db.collection('mensagens');
+ 
+    const novaMensagem  = {
+      id: Math.random().toString(36).substring(7),  
+      remetente: usuario,
+      text: conteudo,
+      timestamp: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'),
+      sent: false
+
+    };
+
+    await collection.insertOne(novaMensagem);
+
+    res.status(200).json({ mensagem: 'Mensagem enviada com sucesso', id: novaMensagem.id });
+
+
+
+  }
+  catch (err:any) {
+    console.error('Erro ao enviar mensagem:', err);
+
+    return res.status(500).json({ erro: 'Erro interno do servidor' });
   }
 }
 
