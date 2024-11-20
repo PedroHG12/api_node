@@ -10,6 +10,7 @@ export async function buscarMensagensAnteriores(req:any, res:any) {
     const collection = db.collection('mensagens');
 
     const mensagensAnteriores = await collection.find().toArray();
+    
     return res.status(200).json(mensagensAnteriores);
   } catch (err) {
     console.error('Erro ao buscar mensagens anteriores:', err);
