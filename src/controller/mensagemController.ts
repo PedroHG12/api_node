@@ -1,5 +1,6 @@
 import { conectarAoBanco } from '../models/banco';
 import { MensagemInterface } from '../models/mensagem.interface';
+import { FeedMensagemInterface } from '@src/models/feedMensagem.interface';
 
 
 export async function buscarMensagensAnteriores(req:any, res:any) {
@@ -162,3 +163,35 @@ export async function excluirMensagemUsuario(req:any, res:any) {
     return res.status(500).json({ erro: 'Erro interno do servidor' });
   }
 }
+
+export async function usuarioEnviarPostGeral(req:any, res:any) {
+  try {
+    const {usuario, conteudo,title,attachment} = req.body;
+    const client = await conectarAoBanco();
+    const db = client.db('chat');
+    const collection = db.collection('feed');
+
+    const novaPostagem : FeedMensagemInterface = {
+      id: Math.random().toString(36).substring(7),  
+      remetente: usuario,
+      content: conteudo,
+      date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'),
+      title: title,
+      attachment:  attachment ? attachment : null,
+
+    };
+
+    await collection.insertOne(novaPostagem);
+
+    res.status(200).json({ mensagem: 'Mensagem enviada com sucesso', id: novaPostagem.id });
+    
+  }
+  catch (err:any) {
+    console.error('Erro ao enviar mensagem:', err);
+
+    return res.status(500).json({ erro: 'Erro interno do servidor' });
+  }
+
+}
+
+
