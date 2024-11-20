@@ -194,4 +194,18 @@ export async function usuarioEnviarPostGeral(req:any, res:any) {
 
 }
 
+export async function buscarPostsGeral(req:any, res:any) {
+  try {
+    const client = await conectarAoBanco();
+    const db = client.db('chat');
+    const collection = db.collection('feed');
+    const mensagens = await collection.find().toArray();
+
+    res.status(200).json(mensagens);
+  } catch (err) {
+    console.error('Erro ao buscar mensagens:', err);
+    res.status(500).json({ erro: 'Erro interno do servidor' });
+  }
+}
+
 
